@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Long Leave Planner - Bulk Upload</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Flatpickr CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container my-5">
+      <h1 class="text-center">Long Leave Planner</h1>
+
+      <!-- File Upload Section -->
+      <div class="form-group">
+        <label for="fileUpload"
+          >Upload a CSV file (Date format: DD-MM-YYYY):</label
+        >
+        <input
+          type="file"
+          id="fileUpload"
+          class="form-control-file"
+          accept=".csv"
+          onchange="handleFileUpload(event)"
+        />
+        <small class="form-text text-muted">
+          Need a template?
+          <a href="/download-template">Download CSV Template</a>
+        </small>
+      </div>
+
+      <!-- Calendar Date Selection -->
+      <div class="form-group">
+        <label for="calendar">Select Bank Holidays:</label>
+        <input
+          type="text"
+          id="calendar"
+          class="form-control"
+          placeholder="Select dates"
+        />
+        <small class="form-text text-muted"
+          >Choose multiple dates by clicking on each date in the
+          calendar.</small
+        >
+      </div>
+
+      <!-- Preview Dates Table -->
+      <h2 class="mt-4">Preview Dates</h2>
+      <table id="datesTable" class="table table-bordered table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- Submit Button -->
+      <button class="btn btn-primary" id="submitButton">Submit Dates</button>
+      <div id="fullCalendar" class="mt-4"></div>
+    </div>
+
+    <!-- Bootstrap, Flatpickr, and Custom Script -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.js"></script>
+    <script src="./javascripts/index.js"></script>
+  </body>
+</html>

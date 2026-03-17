@@ -38,4 +38,6 @@ class Encrypter {
 
 // console.log({ worked: clearText === dencrypted });
 
-module.exports.Encrypter
+module.exports = {
+  Encrypter
+}
