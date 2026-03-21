@@ -28,11 +28,11 @@ export function HolidayPreview({ holidays, onRemove }: HolidayPreviewProps) {
           key={item.date}
           className="flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-lg group"
         >
-          <div>
-            <span className="font-headline font-bold text-on-surface text-sm">{item.date}</span>
+          <div className="flex flex-col gap-0.5 min-w-0">
             {item.label && (
-              <span className="ml-2 font-body text-xs text-on-surface-variant">{item.label}</span>
+              <span className="font-body text-sm font-medium text-on-surface truncate">{item.label}</span>
             )}
+            <span className="font-label text-xs text-on-surface-variant">{item.date}</span>
           </div>
           <button
             onClick={() => onRemove(item.date)}
