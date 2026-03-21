@@ -6,7 +6,7 @@ import type { Country, PreviewItem } from '@/lib/types'
 import { cacheGet, cacheSet, TTL_HOLIDAYS } from '@/lib/clientCache'
 import { formatDateString } from '@/lib/algorithm'
 
-type InputMode = 'auto' | 'manual' | 'csv'
+type AddMode = 'manual' | 'csv'
 
 interface HolidayInputProps {
   year: number
@@ -16,21 +16,18 @@ interface HolidayInputProps {
 }
 
 const TOGGLE_OPTIONS = [
-  { value: 'auto', label: 'Auto' },
-  { value: 'manual', label: 'Manual' },
+  { value: 'manual', label: 'Pick dates' },
   { value: 'csv', label: 'CSV' },
 ]
 
 const DATE_REGEX = /^\d{2}-\d{2}-\d{4}$/
 
-function parseCsvDates(text: string): PreviewItem[] {
+function parseCsvDates(text: string): string[] {
   return text
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line && line !== 'date' && DATE_REGEX.test(line))
-    .map((date) => ({ date }))
 }
-
 
 function getDaysInMonth(year: number, month: number): Date[] {
   const days: Date[] = []
@@ -45,17 +42,16 @@ function getDaysInMonth(year: number, month: number): Date[] {
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-// Mini calendar for manual mode
-function MiniCalendar({ year, selectedDates, onToggle }: {
+function MiniCalendar({ year, autoHolidayDates, extraDates, onToggle }: {
   year: number
-  selectedDates: Set<string>
+  autoHolidayDates: Set<string>   // from country API — shown in green, not togglable
+  extraDates: Set<string>          // user-added manual dates — shown in primary blue
   onToggle: (date: string) => void
 }) {
   const [month, setMonth] = useState(new Date().getMonth())
   const [calYear, setCalYear] = useState(year)
 
   const days = getDaysInMonth(calYear, month)
-  // Monday-start offset
   const firstDayOfWeek = (days[0].getDay() + 6) % 7
 
   const prevMonth = () => {
@@ -69,7 +65,7 @@ function MiniCalendar({ year, selectedDates, onToggle }: {
 
   return (
     <div className="bg-surface-container-low rounded-lg p-4">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <button onClick={prevMonth} className="p-1 rounded-full hover:bg-surface-container">
           <span className="material-symbols-outlined text-lg text-on-surface-variant">chevron_left</span>
         </button>
@@ -78,7 +74,7 @@ function MiniCalendar({ year, selectedDates, onToggle }: {
           <span className="material-symbols-outlined text-lg text-on-surface-variant">chevron_right</span>
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-1 mb-1">
         {DAY_NAMES.map(d => (
           <div key={d} className="text-center font-label text-xs text-on-surface-variant/60 font-bold uppercase py-1">{d}</div>
         ))}
@@ -87,48 +83,87 @@ function MiniCalendar({ year, selectedDates, onToggle }: {
         {Array(firstDayOfWeek).fill(null).map((_, i) => <div key={`e${i}`} />)}
         {days.map(day => {
           const dateStr = formatDateString(day)
-          const selected = selectedDates.has(dateStr)
+          const isAuto = autoHolidayDates.has(dateStr)
+          const isExtra = extraDates.has(dateStr)
+
+          let cls = 'h-9 w-full rounded-lg font-headline text-sm font-bold transition-all '
+          if (isAuto && isExtra) {
+            // manually added on top of an auto holiday — show both signals
+            cls += 'bg-tertiary-fixed text-on-tertiary-fixed ring-2 ring-primary'
+          } else if (isAuto) {
+            // auto holiday — green, not clickable to remove (use preview list)
+            cls += 'bg-tertiary-fixed text-on-tertiary-fixed cursor-default'
+          } else if (isExtra) {
+            cls += 'bg-primary text-white'
+          } else {
+            cls += 'bg-surface-container-lowest text-on-surface hover:bg-surface-container'
+          }
+
           return (
             <button
               key={dateStr}
-              onClick={() => onToggle(dateStr)}
-              className={`h-9 w-full rounded-lg font-headline text-sm font-bold transition-all ${
-                selected
-                  ? 'bg-primary text-white'
-                  : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container'
-              }`}
+              onClick={() => !isAuto && onToggle(dateStr)}
+              className={cls}
+              title={isAuto ? 'Public holiday (edit in list)' : undefined}
             >
               {day.getDate()}
             </button>
           )
         })}
       </div>
+      {autoHolidayDates.size > 0 && (
+        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-outline-variant/10">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-tertiary-fixed" />
+            <span className="font-label text-[10px] text-on-surface-variant uppercase tracking-wide">Public holiday</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-primary" />
+            <span className="font-label text-[10px] text-on-surface-variant uppercase tracking-wide">Added by you</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export function HolidayInput({ year, country, onHolidaysChange, onModeChange }: HolidayInputProps) {
-  const [mode, setMode] = useState<InputMode>('auto')
+  const [addMode, setAddMode] = useState<AddMode>('manual')
   const [loading, setLoading] = useState(false)
   const [autoHolidays, setAutoHolidays] = useState<PreviewItem[]>([])
   const [manualDates, setManualDates] = useState<Set<string>>(new Set())
+  const [csvDates, setCsvDates] = useState<Set<string>>(new Set())
   const [dragging, setDragging] = useState(false)
 
-  // Auto-fetch when country or year changes in auto mode
+  // Derive the merged list whenever any source changes
   useEffect(() => {
-    if (mode !== 'auto' || !country) return
+    const autoSet = new Map(autoHolidays.map(h => [h.date, h]))
+    const extras: PreviewItem[] = []
+    for (const date of Array.from(manualDates)) {
+      if (!autoSet.has(date)) extras.push({ date })
+    }
+    for (const date of Array.from(csvDates)) {
+      if (!autoSet.has(date) && !manualDates.has(date)) extras.push({ date })
+    }
+    onHolidaysChange([...autoHolidays, ...extras])
+  }, [autoHolidays, manualDates, csvDates]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-fetch when country or year changes
+  useEffect(() => {
+    if (!country) {
+      setAutoHolidays([])
+      return
+    }
     const cacheKey = `holidays:${country.countryCode}:${year}`
     const cached = cacheGet<PreviewItem[]>(cacheKey)
     if (cached) {
       setAutoHolidays(cached)
-      onHolidaysChange(cached)
       return
     }
     setLoading(true)
     fetch(`/api/holidays?country=${country.countryCode}&year=${year}`)
       .then(r => r.json())
       .then((data: { date: string; name: string }[] | string[]) => {
-        // Handle both old string[] format and new {date, name}[] format
         const items: PreviewItem[] = Array.isArray(data)
           ? data.map(item =>
               typeof item === 'string'
@@ -138,41 +173,25 @@ export function HolidayInput({ year, country, onHolidaysChange, onModeChange }: 
           : []
         cacheSet(cacheKey, items, TTL_HOLIDAYS)
         setAutoHolidays(items)
-        onHolidaysChange(items)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [country, year, mode]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Manual: sync to parent when manualDates changes
-  useEffect(() => {
-    if (mode !== 'manual') return
-    const items: PreviewItem[] = Array.from(manualDates).map(date => ({ date }))
-    onHolidaysChange(items)
-  }, [manualDates, mode]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [country, year]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleModeChange = (newMode: string) => {
-    setMode(newMode as InputMode)
+    setAddMode(newMode as AddMode)
     onModeChange?.(newMode)
-    if (newMode === 'auto' && country) {
-      onHolidaysChange(autoHolidays)
-    } else if (newMode === 'manual') {
-      const items: PreviewItem[] = Array.from(manualDates).map(date => ({ date }))
-      onHolidaysChange(items)
-    } else if (newMode === 'csv') {
-      onHolidaysChange([])
-    }
   }
 
   const handleCsvFile = useCallback((file: File) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       const text = e.target?.result as string
-      const items = parseCsvDates(text)
-      onHolidaysChange(items)
+      const dates = parseCsvDates(text)
+      setCsvDates(prev => new Set([...Array.from(prev), ...dates]))
     }
     reader.readAsText(file)
-  }, [onHolidaysChange])
+  }, [])
 
   const toggleManualDate = (date: string) => {
     setManualDates(prev => {
@@ -183,90 +202,106 @@ export function HolidayInput({ year, country, onHolidaysChange, onModeChange }: 
     })
   }
 
+  const autoHolidayDateSet = new Set(autoHolidays.map(h => h.date))
+  const extraCount = manualDates.size + csvDates.size
+
   return (
     <div className="space-y-4">
+      {/* Auto-loaded holidays status */}
       <div>
-        <label className="block font-label text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">
-          Input Method
-        </label>
-        <Toggle options={TOGGLE_OPTIONS} value={mode} onChange={handleModeChange} />
+        {!country ? (
+          <p className="text-sm text-on-surface-variant font-body bg-surface-container-low rounded-lg p-4">
+            Select a country above to auto-load public holidays, or pick dates manually below.
+          </p>
+        ) : loading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-10 rounded-lg bg-surface-container-low animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 px-4 py-3 bg-surface-container-low rounded-lg">
+            <span className="material-symbols-outlined text-tertiary-fixed text-lg">event_available</span>
+            <p className="text-sm text-on-surface-variant font-body flex-1">
+              <span className="font-semibold text-on-surface">{autoHolidays.length}</span> public holidays loaded for {country.name} {year}
+              {extraCount > 0 && (
+                <span className="ml-1">+ <span className="font-semibold text-primary">{extraCount}</span> added by you</span>
+              )}
+            </p>
+          </div>
+        )}
       </div>
 
-      {mode === 'auto' && (
-        <div>
-          {!country ? (
-            <p className="text-sm text-on-surface-variant font-body bg-surface-container-low rounded-lg p-4">
-              Select a country above to auto-load public holidays.
-            </p>
-          ) : loading ? (
-            <div className="space-y-2">
-              {[1,2,3].map(i => (
-                <div key={i} className="h-10 rounded-lg bg-surface-container-low animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-on-surface-variant font-body bg-surface-container-low rounded-lg p-4">
-              {autoHolidays.length} public holidays loaded for {country.name} {year}.
-              Remove any you don&apos;t want from the preview list.
-            </p>
-          )}
+      {/* Add extra dates */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <label className="font-label text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+            Add more dates
+          </label>
+          <Toggle options={TOGGLE_OPTIONS} value={addMode} onChange={handleModeChange} />
         </div>
-      )}
 
-      {mode === 'manual' && (
-        <MiniCalendar
-          year={year}
-          selectedDates={manualDates}
-          onToggle={toggleManualDate}
-        />
-      )}
+        {addMode === 'manual' && (
+          <MiniCalendar
+            year={year}
+            autoHolidayDates={autoHolidayDateSet}
+            extraDates={manualDates}
+            onToggle={toggleManualDate}
+          />
+        )}
 
-      {mode === 'csv' && (
-        <div>
-          <div
-            onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault()
-              setDragging(false)
-              const file = e.dataTransfer.files[0]
-              if (file) handleCsvFile(file)
-            }}
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragging ? 'border-primary bg-primary/5' : 'border-outline-variant/30 bg-surface-container-low'
-            }`}
-          >
-            <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 block mb-2">upload_file</span>
-            <p className="font-body text-sm text-on-surface-variant mb-2">
-              Drag & drop a CSV file, or{' '}
-              <label className="text-primary font-semibold cursor-pointer hover:underline">
-                browse
-                <input
-                  type="file"
-                  accept=".csv"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleCsvFile(file)
-                  }}
-                />
-              </label>
-            </p>
-            <p className="font-label text-xs text-on-surface-variant/50 uppercase tracking-wide">
-              CSV with date column, DD-MM-YYYY format
-            </p>
-          </div>
-          <div className="mt-3 text-center">
-            <a
-              href="/template.csv"
-              download
-              className="font-label text-xs text-secondary font-bold hover:underline uppercase tracking-wide"
+        {addMode === 'csv' && (
+          <div>
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault()
+                setDragging(false)
+                const file = e.dataTransfer.files[0]
+                if (file) handleCsvFile(file)
+              }}
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                dragging ? 'border-primary bg-primary/5' : 'border-outline-variant/30 bg-surface-container-low'
+              }`}
             >
-              Download CSV Template
-            </a>
+              <span className="material-symbols-outlined text-4xl text-on-surface-variant/40 block mb-2">upload_file</span>
+              <p className="font-body text-sm text-on-surface-variant mb-2">
+                Drag & drop a CSV file, or{' '}
+                <label className="text-primary font-semibold cursor-pointer hover:underline">
+                  browse
+                  <input
+                    type="file"
+                    accept=".csv"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleCsvFile(file)
+                    }}
+                  />
+                </label>
+              </p>
+              <p className="font-label text-xs text-on-surface-variant/50 uppercase tracking-wide">
+                Dates are added on top of any already loaded
+              </p>
+              {csvDates.size > 0 && (
+                <p className="mt-2 font-label text-xs text-primary font-bold">
+                  {csvDates.size} dates added from CSV
+                </p>
+              )}
+            </div>
+            <div className="mt-3 text-center">
+              <a
+                href="/template.csv"
+                download
+                className="font-label text-xs text-secondary font-bold hover:underline uppercase tracking-wide"
+              >
+                Download CSV Template
+              </a>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
