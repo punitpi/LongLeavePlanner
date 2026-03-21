@@ -13,27 +13,13 @@ const EMPTY_RESPONSE: CalculateResponse = {
   },
 }
 
-// Server-side in-memory cache for calculation results.
-// Key: sorted, joined holiday string (order-independent fingerprint).
-// A standard year has ~15-20 holidays — the number of unique inputs is small.
+// Server-side result cache — key is sorted holiday fingerprint so order doesn't matter.
+// No TTL: results are deterministic; evict oldest when size limit reached.
 const resultCache = new Map<string, CalculateResponse>()
-const CACHE_MAX = 500  // evict oldest when limit reached
+const CACHE_MAX = 500
 
 function getCacheKey(holidays: string[]): string {
-  return [...holidays].sort().join(',')
-}
-
-function getCached(key: string): CalculateResponse | undefined {
-  return resultCache.get(key)
-}
-
-function setCached(key: string, value: CalculateResponse): void {
-  if (resultCache.size >= CACHE_MAX) {
-    // Evict oldest entry (Map preserves insertion order)
-    const firstKey = resultCache.keys().next().value
-    if (firstKey !== undefined) resultCache.delete(firstKey)
-  }
-  resultCache.set(key, value)
+  return holidays.sort().join(',')
 }
 
 export async function POST(request: NextRequest) {
@@ -61,14 +47,18 @@ export async function POST(request: NextRequest) {
   }
 
   const cacheKey = getCacheKey(validatedHolidays)
-  const cached = getCached(cacheKey)
+  const cached = resultCache.get(cacheKey)
   if (cached) {
     return NextResponse.json(cached)
   }
 
   try {
     const result = processHolidays(validatedHolidays)
-    setCached(cacheKey, result)
+    if (resultCache.size >= CACHE_MAX) {
+      const firstKey = resultCache.keys().next().value
+      if (firstKey !== undefined) resultCache.delete(firstKey)
+    }
+    resultCache.set(cacheKey, result)
     return NextResponse.json(result)
   } catch (error) {
     console.error('Algorithm error:', error)

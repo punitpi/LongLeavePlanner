@@ -2,9 +2,7 @@ import type { LeaveDay, LeaveCluster, CalculateResponse } from './types'
 
 const EMOJIS = ['🏖️', '⛰️', '🚲', '🌸', '🎄', '🎆', '🍂', '🌊']
 
-// Internal helpers
-
-function formatDateString(date: Date): string {
+export function formatDateString(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0')
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const year = date.getFullYear()
@@ -35,11 +33,9 @@ export function getHolidayWeekends(bankHolidays: string[]): string[] {
   bankHolidays.forEach(holiday => {
     const [day, month, year] = holiday.split('-')
     const date = new Date(Number(year), Number(month) - 1, Number(day))
-    const dow = date.getDay() // 0=Sun, 1=Mon, ..., 6=Sat
+    const dow = date.getDay()
 
-    // Previous Saturday: subtract enough days to reach the Saturday before this week.
-    // For Sun(0): back 1 day. For Mon(1): back 2. ... For Sat(6): back 0 (same day → skip, already a weekend).
-    // Formula: dow === 0 → 1, else dow === 6 → 0 (we handle Sat specially), else dow + 1
+    // For Saturday holidays, go back a full week so we don't land on the holiday itself
     const daysBackToSat = dow === 0 ? 1 : dow === 6 ? 7 : dow + 1
     const previousSaturday = new Date(date)
     previousSaturday.setDate(date.getDate() - daysBackToSat)
@@ -49,8 +45,7 @@ export function getHolidayWeekends(bankHolidays: string[]): string[] {
     previousSunday.setDate(previousSaturday.getDate() + 1)
     weekends.add(formatDateString(previousSunday))
 
-    // Next Saturday: add enough days to reach the next Saturday from this date.
-    // For Sat(6): 7 days (next Saturday, not itself). For Sun(0): 6. For Mon(1): 5. ... etc.
+    // For Saturday holidays, go forward a full week so we don't land on the holiday itself
     const daysToNextSat = dow === 6 ? 7 : 6 - dow
     const nextSaturday = new Date(date)
     nextSaturday.setDate(date.getDate() + daysToNextSat)
@@ -118,26 +113,19 @@ export function buildClusterMetadata(rawDays: LeaveDay[], index: number): LeaveC
 }
 
 export function processHolidays(bankHolidays: string[]): CalculateResponse {
-  // 1. Get weekends surrounding holidays
   const holidayWeekends = getHolidayWeekends(bankHolidays)
-
-  // 2. Combine with original bank holidays in a Set (deduplicates)
   const allDatesSet = new Set<string>([...bankHolidays, ...holidayWeekends])
-
-  // 3. Sort chronologically
   const sorted = sortByDate(allDatesSet)
-
-  // 4. Convert sorted DD-MM-YYYY strings to Date objects
   const dates = sorted.map(dateStr => {
     const [day, month, year] = dateStr.split('-').map(Number)
     return new Date(year, month - 1, day)
   })
 
-  // 5. Find leave recommendations (pass holiday set so gap days that are holidays aren't marked needToApply)
+  // holidaySet is separate from allDatesSet (which includes weekends) — needed so
+  // gap-fill days that are themselves bank holidays stay needToApply: false
   const holidaySet = new Set(bankHolidays)
   const rawClusters = findLeaveRecommendations(dates, holidaySet)
 
-  // 6. Map raw clusters to LeaveCluster with metadata
   const clusters: LeaveCluster[] = rawClusters.map((rawDays, index) => {
     const leaveDays: LeaveDay[] = rawDays.map(rd => ({
       date: rd.date,
@@ -147,11 +135,8 @@ export function processHolidays(bankHolidays: string[]): CalculateResponse {
     return buildClusterMetadata(leaveDays, index)
   })
 
-  // 7. Compute summary stats
   const totalDaysOff = clusters.reduce((sum, c) => sum + c.totalDays, 0)
   const leaveDaysUsed = clusters.reduce((sum, c) => sum + c.leaveDaysRequired, 0)
-
-  // 8. Efficiency percent
   const efficiencyPercent = leaveDaysUsed === 0
     ? null
     : Math.round((totalDaysOff / leaveDaysUsed) * 100)

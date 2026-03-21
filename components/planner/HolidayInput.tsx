@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Toggle } from '@/components/ui/Toggle'
 import type { Country, PreviewItem } from '@/lib/types'
 import { cacheGet, cacheSet, TTL_HOLIDAYS } from '@/lib/clientCache'
+import { formatDateString } from '@/lib/algorithm'
 
 type InputMode = 'auto' | 'manual' | 'csv'
 
@@ -30,12 +31,6 @@ function parseCsvDates(text: string): PreviewItem[] {
     .map((date) => ({ date }))
 }
 
-function formatDDMMYYYY(date: Date): string {
-  const d = String(date.getDate()).padStart(2, '0')
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const y = date.getFullYear()
-  return `${d}-${m}-${y}`
-}
 
 function getDaysInMonth(year: number, month: number): Date[] {
   const days: Date[] = []
@@ -91,7 +86,7 @@ function MiniCalendar({ year, selectedDates, onToggle }: {
       <div className="grid grid-cols-7 gap-1">
         {Array(firstDayOfWeek).fill(null).map((_, i) => <div key={`e${i}`} />)}
         {days.map(day => {
-          const dateStr = formatDDMMYYYY(day)
+          const dateStr = formatDateString(day)
           const selected = selectedDates.has(dateStr)
           return (
             <button
