@@ -1,80 +1,62 @@
-# Express API Starter Template Project
+# Long Leave Planner
 
-## Dependencies:
+Find extended leave opportunities by strategically placing a few days off around public holidays. The app identifies clusters of holidays and weekends, then highlights which days you need to apply for leave to get a long break.
 
-- [compression](https://www.npmjs.com/package/compression)
-  - Returns the compression middleware using the given options. The middleware will attempt to compress response bodies for all request that traverse through the middleware
-- [cookie-parser](https://www.npmjs.com/package/cookie-parser)
-  - Parse Cookie header and populate req.cookies with an object keyed by the cookie names. Optionally you may enable signed cookie support by passing a secret string, which assigns req.secret so it may be used by other middleware.
-- [cors](https://www.npmjs.com/package/cors)
-  - CORS is a node.js package for providing a Connect/Express middleware that can be used to enable CORS with various options
-- [debug](https://www.npmjs.com/package/debug)
-  - A tiny JavaScript debugging utility modelled after Node.js core's debugging technique. Works in Node.js and web browsers
-- [dotenv](https://www.npmjs.com/package/dotenv)
-  - Dotenv is a zero-dependency module that loads environment variables from a `.env` file into `process.env`
-- [express](https://www.npmjs.com/package/express)
-  - Small, robust tooling for HTTP servers
-- [helmet](https://www.npmjs.com/package/helmet)
-  - Helmet helps you secure your Express apps by setting various HTTP headers. It's not a silver bullet, but it can help!
-- [http-errors](https://www.npmjs.com/package/http-errors)
-  - Create HTTP errors for Express, Koa, Connect, etc. with ease
-- [morgan](https://www.npmjs.com/package/morgan)
-  - HTTP request logger middleware for node.js
+## How it works
 
-## Development Dependencies:
+1. Select your country and year — the app auto-loads public holidays
+2. Or manually pick dates / upload a CSV
+3. Click "Find Long Leaves" to see all leave opportunities visualized on a calendar
 
-- [nodemon](https://www.npmjs.com/package/nodemon)
-  - nodemon is a tool that helps develop node.js based applications by automatically restarting the node application when file changes in the directory are detected.
-- [standard](https://www.npmjs.com/package/standard)
+## Tech Stack
 
-  - Standard JS is detailed as "A JavaScript Standard Style". It is a Style guide, with linter & automatic code fixer. It is a way to enforce consistent style in your project. It automatically formats code.
+- **Frontend & Backend:** Next.js 14 (App Router, TypeScript)
+- **Styling:** Tailwind CSS with custom design system
+- **Holiday Data:** [Nager.Date](https://date.nager.at/) (free, no API key required)
 
-## Scripts
+## Running Locally
 
-### build-dev
-
-Installs all the dependencies
-
-```
-npm i
+```bash
+npm install
+npm run dev
 ```
 
-### build-prod
+Open [http://localhost:3000](http://localhost:3000).
 
-Installs all the dependencies for production
+## Deploy to Vercel
 
-```
-npm ci --only=production
-```
+Push to your GitHub repo and connect to [Vercel](https://vercel.com). It auto-detects Next.js — zero configuration needed.
 
-### dev
+## Deploy with Docker
 
-Run the project using nodemon
-
-```
-nodemon app.local.js --trace-warnings
+```bash
+docker build -t long-leave-planner .
+docker run -p 3000:3000 long-leave-planner
 ```
 
-### start
+Open [http://localhost:3000](http://localhost:3000).
 
-Run the project using node
+## Deploy to Cloudflare Workers
 
-```
-node ./bin/www
-```
+The API routes use standard fetch and no Node.js-specific APIs, making them compatible with the Edge runtime. Add `export const runtime = 'edge'` to each API route file for Cloudflare Workers deployment. Note: the in-memory rate limiter in `middleware.ts` is stateless per request in edge environments — for production, replace with a persistent store like Cloudflare KV.
 
-### lint
+## CSV Upload Format
 
-Runs Standard JS Lint
+Upload a CSV file with a `date` column using `DD-MM-YYYY` format:
 
 ```
-standard './*.js'
+date
+25-12-2025
+01-01-2025
+26-01-2025
 ```
 
-### lintfix
+Download the [template CSV](/template.csv) from the app.
 
-Run Standard JS lint and fix the issues
+## Development
 
-```
-standard ./*.js --fix
+```bash
+npm run test        # Run tests
+npm run lint        # Lint
+npm run build       # Production build
 ```

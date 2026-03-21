@@ -1,34 +1,33 @@
 {
-  "name": "my-express-template",
-  "version": "0.0.0",
-  "description": "This is a express starter template project",
+  "name": "long-leave-planner",
+  "version": "1.0.0",
+  "description": "Find extended leave opportunities around public holidays",
   "private": true,
   "author": "Puneeth Prakash",
   "scripts": {
-    "build-dev": "npm i",
-    "build-prod": "npm ci --only=production",
-    "dev": "nodemon app.local.js --trace-warning",
-    "start": "node ./bin/www",
-    "lint": "standard ./*.js",
-    "lint-fix": "standard ./*.js --fix"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "calendar-base": "^2.0.1",
-    "compression": "^1.7.4",
-    "cookie-parser": "~1.4.4",
-    "cors": "^2.8.5",
-    "dayjs": "^1.11.9",
-    "debug": "~2.6.9",
-    "dotenv": "^10.0.0",
-    "express": "^4.18.2",
-    "helmet": "^4.6.0",
-    "http-errors": "~1.6.3",
-    "memory-cache": "^0.2.0",
-    "morgan": "~1.9.1",
-    "weekday": "^3.0.1"
+    "next": "14.2.35",
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15",
-    "standard": "^16.0.4"
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0"
   }
 }
