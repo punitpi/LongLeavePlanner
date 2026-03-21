@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Long Leave Planner - Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#faf9f6",
+              "on-tertiary-fixed-variant": "#005313",
+              "tertiary-fixed": "#94f990",
+              "primary-fixed-dim": "#ffb68d",
+              "inverse-on-surface": "#f2f1ee",
+              "surface": "#faf9f6",
+              "surface-container": "#efeeeb",
+              "tertiary-container": "#5cbf5e",
+              "on-tertiary-fixed": "#002204",
+              "on-primary": "#ffffff",
+              "surface-dim": "#dbdad7",
+              "outline": "#897266",
+              "error-container": "#ffdad6",
+              "surface-container-low": "#f4f3f1",
+              "on-secondary-fixed": "#001e2f",
+              "surface-variant": "#e3e2e0",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#004a10",
+              "on-secondary": "#ffffff",
+              "secondary-fixed": "#c9e6ff",
+              "on-surface": "#1a1c1a",
+              "on-primary-fixed": "#331200",
+              "outline-variant": "#ddc1b3",
+              "secondary-container": "#91d0fe",
+              "secondary-fixed-dim": "#8fcefb",
+              "inverse-primary": "#ffb68d",
+              "on-primary-container": "#6a2d00",
+              "inverse-surface": "#2f312f",
+              "on-tertiary": "#ffffff",
+              "surface-tint": "#9b4500",
+              "on-error-container": "#93000a",
+              "on-primary-fixed-variant": "#763300",
+              "on-background": "#1a1c1a",
+              "background": "#faf9f6",
+              "tertiary-fixed-dim": "#78dc77",
+              "primary-container": "#ff8c42",
+              "primary-fixed": "#ffdbc9",
+              "surface-container-high": "#e9e8e5",
+              "surface-container-highest": "#e3e2e0",
+              "on-secondary-fixed-variant": "#004c6e",
+              "surface-container-lowest": "#ffffff",
+              "tertiary": "#006e1c",
+              "primary": "#9b4500",
+              "on-surface-variant": "#564338",
+              "error": "#ba1a1a",
+              "on-secondary-container": "#015a82",
+              "secondary": "#19648d"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-effect {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container/30">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 max-w-7xl mx-auto bg-[#faf9f6]/80 dark:bg-[#1a1917]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(86,67,56,0.08)]">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tight text-[#9b4500] dark:text-[#ff8c42] font-headline">Long Leave Planner</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-[#564338] dark:text-[#d7ccc8] hover:bg-[#f5f2ed] dark:hover:bg-[#2a2826] transition-colors px-3 py-1 rounded-full font-label text-sm uppercase tracking-wide" href="#">Planner</a>
+<a class="text-[#9b4500] dark:text-[#ff8c42] font-semibold px-3 py-1 rounded-full font-label text-sm uppercase tracking-wide" href="#">Results</a>
+<a class="text-[#564338] dark:text-[#d7ccc8] hover:bg-[#f5f2ed] dark:hover:bg-[#2a2826] transition-colors px-3 py-1 rounded-full font-label text-sm uppercase tracking-wide" href="#">Saved</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-[#f5f2ed] transition-colors" data-icon="account_circle">account_circle</button>
+<button class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-[#f5f2ed] transition-colors" data-icon="menu">menu</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-7xl mx-auto">
+<!-- Hero Section: Editorial Header -->
+<section class="mb-12">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<p class="font-label text-sm font-bold text-primary uppercase tracking-[0.2em] mb-2">Your 2024 Strategy</p>
+<h1 class="font-headline text-5xl md:text-6xl font-extrabold text-on-surface leading-none tracking-tight">
+                        Optimized <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-container">Time.</span>
+</h1>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-6 py-3 rounded-xl border border-outline-variant/20 font-semibold text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="tune">tune</span>
+                        Adjust Holidays
+                    </button>
+<button class="px-8 py-3 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-bold shadow-lg hover:opacity-90 transition-opacity">
+                        Save Plan
+                    </button>
+</div>
+</div>
+</section>
+<!-- Main Content Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left: The Visual Calendar (Hero of the page) -->
+<div class="lg:col-span-8 space-y-8">
+<div class="bg-surface-container-lowest rounded-lg p-8 shadow-[0_20px_40px_rgba(86,67,56,0.04)]">
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline text-2xl font-bold">December 2024</h2>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-surface-container transition-colors"><span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span></button>
+<button class="p-2 rounded-full hover:bg-surface-container transition-colors"><span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span></button>
+</div>
+</div>
+<!-- Calendar Grid -->
+<div class="grid grid-cols-7 gap-3">
+<!-- Day Labels -->
+<div class="text-center font-label text-xs text-on-surface-variant/60 font-bold uppercase py-2">Mon</div>
+<div class="text-center font-label text-xs text-on-surface-variant/60 font-bold uppercase py-2">Tue</div>
+<div class="text-center font-label text-xs text-on-surface-variant/60 font-bold uppercase py-2">Wed</div>
+<div class="text-center font-label text-xs text-on-surface-variant/60 font-bold uppercase py-2">Thu</div>
+<div class="text-center font-label text-xs text-on-surface-variant/60 font-bold uppercase py-2">Fri</div>
+<div class="text-center font-label text-xs text-on-surface-variant/60 font-bold uppercase py-2">Sat</div>
+<div class="text-center font-label text-xs text-on-surface-variant/60 font-bold uppercase py-2">Sun</div>
+<!-- Days (Mock for December 2024) -->
+<div class="h-24"></div><div class="h-24"></div><div class="h-24"></div><div class="h-24"></div><div class="h-24"></div>
+<!-- Dec 1 -->
+<div class="h-24 rounded-2xl bg-surface-container-low flex flex-col items-center justify-center relative border border-transparent hover:border-outline-variant/30 transition-all">
+<span class="font-headline text-lg font-bold">1</span>
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/40 mt-1">Sun</span>
+</div>
+<!-- Row 2 -->
+<div class="h-24 rounded-2xl bg-surface-container-low flex flex-col items-center justify-center"><span class="font-headline text-lg font-bold">2</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex flex-col items-center justify-center"><span class="font-headline text-lg font-bold">3</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex flex-col items-center justify-center"><span class="font-headline text-lg font-bold">4</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex flex-col items-center justify-center"><span class="font-headline text-lg font-bold">5</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex flex-col items-center justify-center"><span class="font-headline text-lg font-bold">6</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex flex-col items-center justify-center"><span class="font-headline text-lg font-bold">7</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex flex-col items-center justify-center"><span class="font-headline text-lg font-bold">8</span></div>
+<!-- Row 3: Christmas Cluster Starts -->
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">9</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">10</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">11</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">12</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">13</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">14</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">15</span></div>
+<!-- Row 4 -->
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">16</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">17</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">18</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">19</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">20</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">21</span></div>
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">22</span></div>
+<!-- The "Holy Grail" Cluster -->
+<div class="h-24 rounded-2xl bg-surface-container-low flex items-center justify-center"><span class="font-headline text-lg font-bold">23</span></div>
+<!-- Dec 24 (Xmas Eve) -->
+<div class="h-24 rounded-2xl bg-tertiary-fixed flex flex-col items-center justify-center group cursor-help transition-all hover:scale-105">
+<span class="font-headline text-lg font-bold text-on-tertiary-fixed">24</span>
+<span class="material-symbols-outlined text-on-tertiary-fixed text-sm mt-1" data-icon="celebration">celebration</span>
+</div>
+<!-- Dec 25 (Xmas Day) -->
+<div class="h-24 rounded-2xl bg-tertiary-fixed flex flex-col items-center justify-center group cursor-help transition-all hover:scale-105">
+<span class="font-headline text-lg font-bold text-on-tertiary-fixed">25</span>
+<span class="material-symbols-outlined text-on-tertiary-fixed text-sm mt-1" data-icon="event">event</span>
+</div>
+<!-- Dec 26 (Leave Required) -->
+<div class="h-24 rounded-2xl bg-primary-container/20 border-2 border-dashed border-primary flex flex-col items-center justify-center group cursor-pointer transition-all hover:bg-primary-container/30">
+<span class="font-headline text-lg font-bold text-primary">26</span>
+<span class="text-[9px] uppercase font-black text-primary tracking-tighter mt-1">APPLY LEAVE</span>
+</div>
+<!-- Dec 27 (Leave Required) -->
+<div class="h-24 rounded-2xl bg-primary-container/20 border-2 border-dashed border-primary flex flex-col items-center justify-center group cursor-pointer transition-all hover:bg-primary-container/30">
+<span class="font-headline text-lg font-bold text-primary">27</span>
+<span class="text-[9px] uppercase font-black text-primary tracking-tighter mt-1">APPLY LEAVE</span>
+</div>
+<!-- Dec 28 (Sat) -->
+<div class="h-24 rounded-2xl bg-tertiary-fixed/60 flex flex-col items-center justify-center">
+<span class="font-headline text-lg font-bold text-on-tertiary-fixed">28</span>
+</div>
+<!-- Dec 29 (Sun) -->
+<div class="h-24 rounded-2xl bg-tertiary-fixed/60 flex flex-col items-center justify-center">
+<span class="font-headline text-lg font-bold text-on-tertiary-fixed">29</span>
+</div>
+</div>
+<!-- Legend -->
+<div class="mt-10 flex flex-wrap gap-8 pt-8 border-t border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-tertiary-container"></div>
+<span class="font-label text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Public Holiday / Weekend</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-primary-container"></div>
+<span class="font-label text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Recommended Leave</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded-full bg-surface-container-highest"></div>
+<span class="font-label text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Standard Working Day</span>
+</div>
+</div>
+</div>
+<!-- Year Navigation Tonal Layering -->
+<div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+<button class="flex-shrink-0 px-6 py-4 rounded-lg bg-surface-container-highest font-bold text-on-surface">Jan</button>
+<button class="flex-shrink-0 px-6 py-4 rounded-lg bg-surface-container-low font-bold text-on-surface-variant/60">Feb</button>
+<button class="flex-shrink-0 px-6 py-4 rounded-lg bg-surface-container-low font-bold text-on-surface-variant/60">Mar</button>
+<button class="flex-shrink-0 px-6 py-4 rounded-lg bg-surface-container-low font-bold text-on-surface-variant/60">Apr</button>
+<button class="flex-shrink-0 px-6 py-4 rounded-lg bg-surface-container-low font-bold text-on-surface-variant/60">May</button>
+<button class="flex-shrink-0 px-6 py-4 rounded-lg bg-surface-container-low font-bold text-on-surface-variant/60">Jun</button>
+<button class="flex-shrink-0 px-6 py-4 rounded-lg bg-surface-container-low font-bold text-on-surface-variant/60">Jul</button>
+<button class="flex-shrink-0 px-6 py-4 rounded-lg bg-surface-container-low font-bold text-on-surface-variant/60">Aug</button>
+</div>
+</div>
+<!-- Right: Sidebar Opportunity Cards -->
+<aside class="lg:col-span-4 space-y-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline text-xl font-bold">Holiday Clusters</h3>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 rounded-full text-[10px] font-black uppercase">3 Found</span>
+</div>
+<!-- Opportunity Card 1 -->
+<div class="relative group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary to-primary-container rounded-lg opacity-0 group-hover:opacity-10 transition-opacity"></div>
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-[0_10px_20px_rgba(86,67,56,0.03)] border border-transparent hover:border-primary-container/20 transition-all flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-2xl">🏖️</div>
+<span class="font-label text-[10px] font-black text-on-tertiary-fixed-variant bg-tertiary-fixed px-3 py-1 rounded-full uppercase tracking-tighter">Total Days Off: 9</span>
+</div>
+<div>
+<h4 class="font-headline text-lg font-bold text-on-surface">Christmas Break</h4>
+<p class="text-sm text-on-surface-variant font-medium">Dec 21 – Dec 29</p>
+</div>
+<div class="p-4 bg-primary-fixed/30 rounded-lg flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="event_note">event_note</span>
+<div>
+<p class="text-xs font-bold text-on-primary-fixed-variant uppercase tracking-wide">Apply leave:</p>
+<p class="text-sm font-semibold text-primary">Dec 26 &amp; 27 only</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Opportunity Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-[0_10px_20px_rgba(86,67,56,0.03)] flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-2xl">⛰️</div>
+<span class="font-label text-[10px] font-black text-on-tertiary-fixed-variant bg-tertiary-fixed px-3 py-1 rounded-full uppercase tracking-tighter">Total Days Off: 4</span>
+</div>
+<div>
+<h4 class="font-headline text-lg font-bold text-on-surface">Easter Escape</h4>
+<p class="text-sm text-on-surface-variant font-medium">Mar 29 – Apr 1</p>
+</div>
+<div class="p-4 bg-surface-container-low rounded-lg flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="info">info</span>
+<div>
+<p class="text-xs font-bold text-on-surface-variant/60 uppercase tracking-wide">No Leave Required</p>
+<p class="text-sm font-semibold text-on-surface-variant">Pure holiday cluster</p>
+</div>
+</div>
+</div>
+<!-- Opportunity Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-[0_10px_20px_rgba(86,67,56,0.03)] flex flex-col gap-6 opacity-60 hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-2xl">🚲</div>
+<span class="font-label text-[10px] font-black text-on-tertiary-fixed-variant bg-tertiary-fixed px-3 py-1 rounded-full uppercase tracking-tighter">Total Days Off: 3</span>
+</div>
+<div>
+<h4 class="font-headline text-lg font-bold text-on-surface">Labor Day Link</h4>
+<p class="text-sm text-on-surface-variant font-medium">May 1 – May 3</p>
+</div>
+<div class="p-4 bg-primary-fixed/30 rounded-lg flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="event_note">event_note</span>
+<div>
+<p class="text-xs font-bold text-on-primary-fixed-variant uppercase tracking-wide">Apply leave:</p>
+<p class="text-sm font-semibold text-primary">May 2 only</p>
+</div>
+</div>
+</div>
+<!-- Floating Summary -->
+<div class="bg-inverse-surface text-inverse-on-surface p-6 rounded-lg mt-8">
+<p class="font-label text-[10px] uppercase font-bold tracking-[0.2em] mb-4 opacity-70 text-secondary-container">Summary of Gains</p>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-3xl font-headline font-extrabold">16</span>
+<span class="text-xs font-label uppercase font-medium opacity-70 pb-1">Total Days Off</span>
+</div>
+<div class="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+<div class="flex justify-between text-xs font-bold">
+<span>Using 5 Leave Days</span>
+<span class="text-tertiary-fixed">320% Efficiency</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only Responsive Pivot) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#faf9f6]/90 dark:bg-[#1a1917]/90 backdrop-blur-2xl rounded-t-lg shadow-[0_-10px_30px_rgba(86,67,56,0.05)]">
+<button class="flex flex-col items-center justify-center text-[#564338]/60 dark:text-[#d7ccc8]/60 p-3 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label text-[10px] mt-1 uppercase tracking-wider">Planner</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-gradient-to-br from-[#9b4500] to-[#ff8c42]/20 text-[#9b4500] dark:text-[#ff8c42] rounded-full p-3 scale-110">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label text-[10px] mt-1 uppercase tracking-wider">Results</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#564338]/60 dark:text-[#d7ccc8]/60 p-3 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-label text-[10px] mt-1 uppercase tracking-wider">Saved</span>
+</button>
+</nav>
+</body></html>
