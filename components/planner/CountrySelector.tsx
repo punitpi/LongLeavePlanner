@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { Country } from '@/lib/types'
 import { GlassPanel } from '@/components/ui/GlassPanel'
+import { cacheGet, cacheSet, TTL_COUNTRIES } from '@/lib/clientCache'
 
 function countryCodeToFlag(code: string): string {
   return code.toUpperCase().split('').map(
@@ -23,9 +24,16 @@ export function CountrySelector({ value, onChange }: CountrySelectorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const cached = cacheGet<Country[]>('countries')
+    if (cached) {
+      setCountries(cached)
+      setLoading(false)
+      return
+    }
     fetch('/api/countries')
       .then((r) => r.json())
-      .then((data) => {
+      .then((data: Country[]) => {
+        cacheSet('countries', data, TTL_COUNTRIES)
         setCountries(data)
         setLoading(false)
       })

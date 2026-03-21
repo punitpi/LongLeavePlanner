@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Toggle } from '@/components/ui/Toggle'
 import type { Country, PreviewItem } from '@/lib/types'
+import { cacheGet, cacheSet, TTL_HOLIDAYS } from '@/lib/clientCache'
 
 type InputMode = 'auto' | 'manual' | 'csv'
 
@@ -121,6 +122,13 @@ export function HolidayInput({ year, country, onHolidaysChange, onModeChange }: 
   // Auto-fetch when country or year changes in auto mode
   useEffect(() => {
     if (mode !== 'auto' || !country) return
+    const cacheKey = `holidays:${country.countryCode}:${year}`
+    const cached = cacheGet<PreviewItem[]>(cacheKey)
+    if (cached) {
+      setAutoHolidays(cached)
+      onHolidaysChange(cached)
+      return
+    }
     setLoading(true)
     fetch(`/api/holidays?country=${country.countryCode}&year=${year}`)
       .then(r => r.json())
@@ -133,6 +141,7 @@ export function HolidayInput({ year, country, onHolidaysChange, onModeChange }: 
                 : { date: item.date, label: item.name }
             )
           : []
+        cacheSet(cacheKey, items, TTL_HOLIDAYS)
         setAutoHolidays(items)
         onHolidaysChange(items)
       })

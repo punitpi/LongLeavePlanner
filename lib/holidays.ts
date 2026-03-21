@@ -53,7 +53,7 @@ export async function getPublicHolidays(year: number, countryCode: string): Prom
     if (staticData !== null) {
       return staticData.map(h => ({
         date: nagerDateToAlgorithmDate(h.date),
-        name: h.localName || h.name,
+        name: h.name || h.localName,
       }))
     }
   }
@@ -69,6 +69,6 @@ export async function getPublicHolidays(year: number, countryCode: string): Prom
   const data = await res.json()
   return data.map((h: { date: string; localName: string; name: string }) => ({
     date: nagerDateToAlgorithmDate(h.date),
-    name: h.localName || h.name,
+    name: h.name || h.localName,
   }))
 }
