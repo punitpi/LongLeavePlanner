@@ -13,6 +13,29 @@ const EMPTY_RESPONSE: CalculateResponse = {
   },
 }
 
+// Server-side in-memory cache for calculation results.
+// Key: sorted, joined holiday string (order-independent fingerprint).
+// A standard year has ~15-20 holidays — the number of unique inputs is small.
+const resultCache = new Map<string, CalculateResponse>()
+const CACHE_MAX = 500  // evict oldest when limit reached
+
+function getCacheKey(holidays: string[]): string {
+  return [...holidays].sort().join(',')
+}
+
+function getCached(key: string): CalculateResponse | undefined {
+  return resultCache.get(key)
+}
+
+function setCached(key: string, value: CalculateResponse): void {
+  if (resultCache.size >= CACHE_MAX) {
+    // Evict oldest entry (Map preserves insertion order)
+    const firstKey = resultCache.keys().next().value
+    if (firstKey !== undefined) resultCache.delete(firstKey)
+  }
+  resultCache.set(key, value)
+}
+
 export async function POST(request: NextRequest) {
   let body: unknown
   try {
@@ -37,8 +60,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(EMPTY_RESPONSE)
   }
 
+  const cacheKey = getCacheKey(validatedHolidays)
+  const cached = getCached(cacheKey)
+  if (cached) {
+    return NextResponse.json(cached)
+  }
+
   try {
     const result = processHolidays(validatedHolidays)
+    setCached(cacheKey, result)
     return NextResponse.json(result)
   } catch (error) {
     console.error('Algorithm error:', error)
