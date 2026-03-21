@@ -128,8 +128,8 @@ export default function ResultsPage() {
             />
           </div>
 
-          {/* Right: Cards */}
-          <aside className="lg:col-span-4 space-y-4">
+          {/* Right: Cards — sticky with independent scroll */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-8 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto lg:scrollbar-hide space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-headline text-xl font-bold text-on-surface">Holiday Clusters</h3>
               {clusters.length > 0 && (
