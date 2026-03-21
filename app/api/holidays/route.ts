@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Returns [{ date: 'DD-MM-YYYY', name: 'Holiday Name' }]
     const holidays = await getPublicHolidays(year, country.toUpperCase())
     return NextResponse.json(holidays)
   } catch (error) {

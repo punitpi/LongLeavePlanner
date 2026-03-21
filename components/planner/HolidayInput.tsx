@@ -123,8 +123,15 @@ export function HolidayInput({ year, country, onHolidaysChange }: HolidayInputPr
     setLoading(true)
     fetch(`/api/holidays?country=${country.countryCode}&year=${year}`)
       .then(r => r.json())
-      .then((dates: string[]) => {
-        const items: PreviewItem[] = dates.map(date => ({ date }))
+      .then((data: { date: string; name: string }[] | string[]) => {
+        // Handle both old string[] format and new {date, name}[] format
+        const items: PreviewItem[] = Array.isArray(data)
+          ? data.map(item =>
+              typeof item === 'string'
+                ? { date: item }
+                : { date: item.date, label: item.name }
+            )
+          : []
         setAutoHolidays(items)
         onHolidaysChange(items)
       })
