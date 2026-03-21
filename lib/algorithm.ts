@@ -12,7 +12,12 @@ function formatDateString(date: Date): string {
 }
 
 function toISODateString(date: Date): string {
-  return date.toISOString().split('T')[0]
+  // Use local year/month/day — NOT toISOString() which converts to UTC first
+  // and will give the wrong date in UTC+ timezones (e.g. IST, CET at midnight)
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
 
 function sortByDate(dates: Set<string>): string[] {
@@ -25,23 +30,30 @@ function sortByDate(dates: Set<string>): string[] {
   })
 }
 
-function getHolidayWeekends(bankHolidays: string[]): string[] {
+export function getHolidayWeekends(bankHolidays: string[]): string[] {
   const weekends = new Set<string>()
   bankHolidays.forEach(holiday => {
     const [day, month, year] = holiday.split('-')
-    const previousSaturday = new Date(Number(year), Number(month) - 1, Number(day))
-    previousSaturday.setDate(
-      previousSaturday.getDate() -
-        (previousSaturday.getDay() === 0 ? 1 : previousSaturday.getDay() + 1)
-    )
+    const date = new Date(Number(year), Number(month) - 1, Number(day))
+    const dow = date.getDay() // 0=Sun, 1=Mon, ..., 6=Sat
+
+    // Previous Saturday: subtract enough days to reach the Saturday before this week.
+    // For Sun(0): back 1 day. For Mon(1): back 2. ... For Sat(6): back 0 (same day → skip, already a weekend).
+    // Formula: dow === 0 → 1, else dow === 6 → 0 (we handle Sat specially), else dow + 1
+    const daysBackToSat = dow === 0 ? 1 : dow === 6 ? 7 : dow + 1
+    const previousSaturday = new Date(date)
+    previousSaturday.setDate(date.getDate() - daysBackToSat)
     weekends.add(formatDateString(previousSaturday))
 
     const previousSunday = new Date(previousSaturday)
     previousSunday.setDate(previousSaturday.getDate() + 1)
     weekends.add(formatDateString(previousSunday))
 
-    const nextSaturday = new Date(Number(year), Number(month) - 1, Number(day))
-    nextSaturday.setDate(nextSaturday.getDate() + (6 - nextSaturday.getDay()))
+    // Next Saturday: add enough days to reach the next Saturday from this date.
+    // For Sat(6): 7 days (next Saturday, not itself). For Sun(0): 6. For Mon(1): 5. ... etc.
+    const daysToNextSat = dow === 6 ? 7 : 6 - dow
+    const nextSaturday = new Date(date)
+    nextSaturday.setDate(date.getDate() + daysToNextSat)
     weekends.add(formatDateString(nextSaturday))
 
     const nextSunday = new Date(nextSaturday)
@@ -52,6 +64,7 @@ function getHolidayWeekends(bankHolidays: string[]): string[] {
 }
 
 function findLeaveRecommendations(dates: Date[], holidaySet: Set<string>): Array<Array<{ date: Date; needToApply: boolean }>> {
+  if (dates.length === 0) return []
   const combinedLeaves: Array<Array<{ date: Date; needToApply: boolean }>> = []
   let currentGroup: Array<{ date: Date; needToApply: boolean }> = [{ date: dates[0], needToApply: false }]
 
