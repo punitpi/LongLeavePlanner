@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, Be_Vietnam_Pro } from 'next/font/google'
 import { Header } from '@/components/ui/Header'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -51,6 +52,7 @@ export default function RootLayout({
             <span className="font-label text-[10px] uppercase tracking-wider">Results</span>
           </a>
         </nav>
+        <Analytics />
       </body>
     </html>
   )
