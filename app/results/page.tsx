@@ -6,39 +6,55 @@ import { LeaveCalendar } from '@/components/results/LeaveCalendar'
 import { MonthNav } from '@/components/results/MonthNav'
 import { OpportunityCard } from '@/components/results/OpportunityCard'
 import { SummaryCard } from '@/components/results/SummaryCard'
+import { SessionSwitcher } from '@/components/results/SessionSwitcher'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import type { CalculateResponse } from '@/lib/types'
-
-interface StoredResults extends CalculateResponse {
-  year: number
-}
+import { getSessions, deleteSession } from '@/lib/sessions'
+import type { Session } from '@/lib/types'
 
 export default function ResultsPage() {
   const router = useRouter()
-  const [results, setResults] = useState<StoredResults | null>(null)
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [activeSession, setActiveSession] = useState<Session | null>(null)
+  // Default to current month — NOT first cluster month
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
   const [activeClusterId, setActiveClusterId] = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem('llp_results')
-      if (!raw) { router.replace('/'); return }
-      const parsed = JSON.parse(raw) as StoredResults
-      if (!parsed.clusters || !parsed.summary) { router.replace('/'); return }
-      setResults(parsed)
-
-      // Navigate to the month of the first cluster (if any)
-      if (parsed.clusters.length > 0) {
-        const firstClusterMonth = parseInt(parsed.clusters[0].startDate.split('-')[1], 10) - 1
-        setCurrentMonth(firstClusterMonth)
-      }
-    } catch {
+    const allSessions = getSessions()
+    if (allSessions.length === 0) {
       router.replace('/')
+      return
     }
+
+    setSessions(allSessions)
+
+    // Load the last active session ID, or use the most recent session
+    const activeId = localStorage.getItem('llp_active_session')
+    const active = (activeId ? allSessions.find(s => s.id === activeId) : null) ?? allSessions[0]
+    setActiveSession(active)
   }, [router])
 
-  if (!results) {
+  const handleSwitchSession = (session: Session) => {
+    setActiveSession(session)
+    setActiveClusterId(null)
+    localStorage.setItem('llp_active_session', session.id)
+  }
+
+  const handleDeleteSession = (id: string) => {
+    const remaining = deleteSession(id)
+    setSessions(remaining)
+    if (remaining.length === 0) {
+      router.replace('/')
+      return
+    }
+    if (activeSession?.id === id) {
+      setActiveSession(remaining[0])
+      localStorage.setItem('llp_active_session', remaining[0].id)
+    }
+  }
+
+  if (!activeSession) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -46,17 +62,25 @@ export default function ResultsPage() {
     )
   }
 
-  const { clusters, summary, year } = results
+  const { clusters, summary, year, holidayLabels } = activeSession
 
   return (
     <div className="min-h-screen pb-24 px-6">
       <div className="max-w-7xl mx-auto py-12">
+        {/* Session Switcher */}
+        <SessionSwitcher
+          sessions={sessions}
+          activeSessionId={activeSession.id}
+          onSwitch={handleSwitchSession}
+          onDelete={handleDeleteSession}
+        />
+
         {/* Editorial Header */}
         <section className="mb-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <p className="font-label text-sm font-bold text-primary uppercase tracking-[0.2em] mb-2">
-                Your {year} Strategy
+                {activeSession.label}
               </p>
               <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-on-surface leading-none tracking-tight">
                 Optimized{' '}
@@ -65,10 +89,18 @@ export default function ResultsPage() {
                 </span>
               </h1>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
+              <Button
+                variant="secondary"
+                onClick={() => handleDeleteSession(activeSession.id)}
+                className="flex items-center gap-2 text-error border-error/20"
+              >
+                <span className="material-symbols-outlined text-lg">delete</span>
+                Delete Plan
+              </Button>
               <Button variant="secondary" onClick={() => router.push('/')} className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-lg">tune</span>
-                Adjust Holidays
+                <span className="material-symbols-outlined text-lg">add</span>
+                New Plan
               </Button>
             </div>
           </div>
@@ -84,6 +116,7 @@ export default function ResultsPage() {
                 month={currentMonth}
                 clusters={clusters}
                 activeClusterId={activeClusterId}
+                holidayLabels={holidayLabels}
                 onMonthChange={setCurrentMonth}
               />
             </Card>
@@ -124,6 +157,7 @@ export default function ResultsPage() {
                   <OpportunityCard
                     key={cluster.id}
                     cluster={cluster}
+                    holidayLabels={holidayLabels}
                     isActive={activeClusterId === cluster.id}
                     onMouseEnter={() => {
                       setActiveClusterId(cluster.id)

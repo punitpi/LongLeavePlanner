@@ -8,12 +8,14 @@ import { HolidayInput } from '@/components/planner/HolidayInput'
 import { HolidayPreview } from '@/components/planner/HolidayPreview'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import type { Country, PreviewItem, CalculateResponse } from '@/lib/types'
+import type { Country, PreviewItem, CalculateResponse, Session } from '@/lib/types'
+import { saveSession, generateSessionLabel, generateId } from '@/lib/sessions'
 
 export default function PlannerPage() {
   const router = useRouter()
   const [year, setYear] = useState(() => new Date().getFullYear())
   const [country, setCountry] = useState<Country | null>(null)
+  const [inputMode, setInputMode] = useState<string>('auto')
   const [holidays, setHolidays] = useState<PreviewItem[]>([])
   const [isCalculating, setIsCalculating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,7 +42,28 @@ export default function PlannerPage() {
         throw new Error(body.error || 'Calculation failed')
       }
       const data: CalculateResponse = await res.json()
-      sessionStorage.setItem('llp_results', JSON.stringify({ ...data, year }))
+      // Build holiday name lookup: YYYY-MM-DD -> name
+      const holidayLabels: Record<string, string> = {}
+      holidays.forEach(h => {
+        if (h.label) {
+          // Convert DD-MM-YYYY to YYYY-MM-DD for lookup key
+          const [d, m, y] = h.date.split('-')
+          holidayLabels[`${y}-${m}-${d}`] = h.label
+        }
+      })
+
+      const session: Session = {
+        id: generateId(),
+        label: generateSessionLabel(country, inputMode, year),
+        year,
+        clusters: data.clusters,
+        summary: data.summary,
+        holidayLabels,
+        createdAt: Date.now(),
+      }
+      saveSession(session)
+      // Store active session ID for results page
+      localStorage.setItem('llp_active_session', session.id)
       router.push('/results')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -83,6 +106,7 @@ export default function PlannerPage() {
                 year={year}
                 country={country}
                 onHolidaysChange={setHolidays}
+                onModeChange={setInputMode}
               />
             </Card>
 

@@ -12,10 +12,11 @@ interface LeaveCalendarProps {
   month: number  // 0-indexed
   clusters: LeaveCluster[]
   activeClusterId?: string | null
+  holidayLabels?: Record<string, string>
   onMonthChange: (month: number) => void
 }
 
-export function LeaveCalendar({ year, month, clusters, activeClusterId, onMonthChange }: LeaveCalendarProps) {
+export function LeaveCalendar({ year, month, clusters, activeClusterId, holidayLabels, onMonthChange }: LeaveCalendarProps) {
   // Build a map of dateString (YYYY-MM-DD) -> 'holiday' | 'apply'
   const dateMap = useMemo(() => {
     const map = new Map<string, 'holiday' | 'apply'>()
@@ -84,12 +85,19 @@ export function LeaveCalendar({ year, month, clusters, activeClusterId, onMonthC
       cellClass += 'ring-2 ring-secondary '
     }
 
+    const holidayName = type === 'holiday' ? holidayLabels?.[dateStr] : undefined
+
     return (
-      <div key={dateStr} className={cellClass}>
+      <div key={dateStr} className={cellClass} title={holidayName}>
         <span className={numClass}>{day}</span>
         {label && (
           <span className="text-[8px] uppercase font-black text-primary tracking-tighter leading-none mt-0.5">
             {label}
+          </span>
+        )}
+        {holidayName && (
+          <span className="text-[7px] font-body text-on-tertiary-fixed/70 leading-none mt-0.5 px-1 text-center line-clamp-1 max-w-full">
+            {holidayName}
           </span>
         )}
       </div>

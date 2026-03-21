@@ -4,6 +4,7 @@ import type { LeaveCluster } from '@/lib/types'
 
 interface OpportunityCardProps {
   cluster: LeaveCluster
+  holidayLabels?: Record<string, string>
   isActive?: boolean
   onMouseEnter?: () => void
   onMouseLeave?: () => void
@@ -16,7 +17,7 @@ function formatDisplayDate(isoDate: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export function OpportunityCard({ cluster, isActive, onMouseEnter, onMouseLeave }: OpportunityCardProps) {
+export function OpportunityCard({ cluster, holidayLabels, isActive, onMouseEnter, onMouseLeave }: OpportunityCardProps) {
   const dateRange = `${formatDisplayDate(cluster.startDate)} – ${formatDisplayDate(cluster.endDate)}`
 
   return (
@@ -47,6 +48,24 @@ export function OpportunityCard({ cluster, isActive, onMouseEnter, onMouseLeave 
             {cluster.emoji} Break
           </h4>
           <p className="text-sm text-on-surface-variant font-medium font-body">{dateRange}</p>
+          {/* Holiday names in this cluster */}
+          {(() => {
+            if (!holidayLabels) return null
+            const names = cluster.days
+              .filter(d => !d.needToApply && holidayLabels[d.dateString])
+              .map(d => holidayLabels[d.dateString])
+            const unique = Array.from(new Set(names))
+            if (unique.length === 0) return null
+            return (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {unique.map(name => (
+                  <span key={name} className="font-label text-[9px] uppercase font-bold text-tertiary bg-tertiary-fixed/30 px-2 py-0.5 rounded-full">
+                    {name}
+                  </span>
+                ))}
+              </div>
+            )
+          })()}
         </div>
 
         {/* Leave requirement box */}

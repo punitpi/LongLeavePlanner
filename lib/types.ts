@@ -42,3 +42,13 @@ export interface PreviewItem {
   date: string       // DD-MM-YYYY
   label?: string     // from API holiday name, optional for manual/csv entries
 }
+
+export interface Session {
+  id: string
+  label: string
+  year: number
+  clusters: LeaveCluster[]
+  summary: SummaryStats
+  holidayLabels: Record<string, string>  // YYYY-MM-DD -> holiday name
+  createdAt: number  // Date.now()
+}

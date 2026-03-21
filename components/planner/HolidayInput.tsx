@@ -10,6 +10,7 @@ interface HolidayInputProps {
   year: number
   country: Country | null
   onHolidaysChange: (holidays: PreviewItem[]) => void
+  onModeChange?: (mode: string) => void
 }
 
 const TOGGLE_OPTIONS = [
@@ -110,7 +111,7 @@ function MiniCalendar({ year, selectedDates, onToggle }: {
   )
 }
 
-export function HolidayInput({ year, country, onHolidaysChange }: HolidayInputProps) {
+export function HolidayInput({ year, country, onHolidaysChange, onModeChange }: HolidayInputProps) {
   const [mode, setMode] = useState<InputMode>('auto')
   const [loading, setLoading] = useState(false)
   const [autoHolidays, setAutoHolidays] = useState<PreviewItem[]>([])
@@ -148,6 +149,7 @@ export function HolidayInput({ year, country, onHolidaysChange }: HolidayInputPr
 
   const handleModeChange = (newMode: string) => {
     setMode(newMode as InputMode)
+    onModeChange?.(newMode)
     if (newMode === 'auto' && country) {
       onHolidaysChange(autoHolidays)
     } else if (newMode === 'manual') {
