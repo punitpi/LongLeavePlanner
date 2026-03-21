@@ -51,7 +51,7 @@ function getHolidayWeekends(bankHolidays: string[]): string[] {
   return Array.from(weekends)
 }
 
-function findLeaveRecommendations(dates: Date[]): Array<Array<{ date: Date; needToApply: boolean }>> {
+function findLeaveRecommendations(dates: Date[], holidaySet: Set<string>): Array<Array<{ date: Date; needToApply: boolean }>> {
   const combinedLeaves: Array<Array<{ date: Date; needToApply: boolean }>> = []
   let currentGroup: Array<{ date: Date; needToApply: boolean }> = [{ date: dates[0], needToApply: false }]
 
@@ -66,7 +66,9 @@ function findLeaveRecommendations(dates: Date[]): Array<Array<{ date: Date; need
       for (let gap = 1; gap < dayDifference; gap++) {
         const missingDate = new Date(previousDate)
         missingDate.setDate(missingDate.getDate() + gap)
-        currentGroup.push({ date: missingDate, needToApply: true })
+        // If this gap day is itself a public holiday, don't mark it as leave to apply
+        const missingStr = formatDateString(missingDate)
+        currentGroup.push({ date: missingDate, needToApply: !holidaySet.has(missingStr) })
       }
       currentGroup.push({ date: currentDate, needToApply: false })
     } else {
@@ -118,8 +120,9 @@ export function processHolidays(bankHolidays: string[]): CalculateResponse {
     return new Date(year, month - 1, day)
   })
 
-  // 5. Find leave recommendations
-  const rawClusters = findLeaveRecommendations(dates)
+  // 5. Find leave recommendations (pass holiday set so gap days that are holidays aren't marked needToApply)
+  const holidaySet = new Set(bankHolidays)
+  const rawClusters = findLeaveRecommendations(dates, holidaySet)
 
   // 6. Map raw clusters to LeaveCluster with metadata
   const clusters: LeaveCluster[] = rawClusters.map((rawDays, index) => {
