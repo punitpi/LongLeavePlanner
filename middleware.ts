@@ -8,14 +8,17 @@ const RATE_LIMIT = 30
 const WINDOW_MS = 60 * 1000 // 1 minute
 
 function getRateLimitKey(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown'
-  return ip
+  // Prefer platform-injected IP (not spoofable by client) over x-forwarded-for (client-controlled)
+  return (
+    request.ip ??
+    request.headers.get('x-real-ip') ??
+    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    'unknown'
+  )
 }
 
 export function middleware(request: NextRequest) {
-  // Only rate limit the calculate endpoint
-  if (!request.nextUrl.pathname.startsWith('/api/calculate')) {
+  if (!request.nextUrl.pathname.startsWith('/api/')) {
     return NextResponse.next()
   }
 
@@ -49,5 +52,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/calculate'],
+  matcher: ['/api/:path*'],
 }

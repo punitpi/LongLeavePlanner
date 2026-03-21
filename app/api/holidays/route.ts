@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPublicHolidays } from '@/lib/holidays'
+import { getPublicHolidays, getCountries } from '@/lib/holidays'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -32,8 +32,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Returns [{ date: 'DD-MM-YYYY', name: 'Holiday Name' }]
-    const holidays = await getPublicHolidays(year, country.toUpperCase())
+    const upperCode = country.toUpperCase()
+    // Validate against the known country list before proxying to Nager.Date
+    const knownCountries = await getCountries()
+    if (!knownCountries.some(c => c.countryCode === upperCode)) {
+      return NextResponse.json({ error: 'Unknown country code' }, { status: 400 })
+    }
+    const holidays = await getPublicHolidays(year, upperCode)
     return NextResponse.json(holidays)
   } catch (error) {
     console.error('Failed to fetch holidays:', error)
