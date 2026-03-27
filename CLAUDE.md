@@ -15,8 +15,8 @@ Next.js 14 (App Router, TypeScript, Tailwind). All work on `feature/nextjs-rebui
 - Never use `date.toISOString()` for local dates — it converts to UTC first and gives the wrong day in UTC+ timezones (IST, CET). Use `date.getFullYear()` / `getMonth()` / `getDate()` instead.
 
 ## Architecture
-- `app/page.tsx` — planner (input) page; posts to `/api/calculate` on submit
-- `app/results/page.tsx` — results page; reads sessions from localStorage
+- `app/(main)/page.tsx` — planner (input) page; posts to `/api/calculate` on submit
+- `app/(main)/results/page.tsx` — results page; reads sessions from localStorage
 - `app/api/` — three routes: `countries`, `holidays` (Nager.Date proxy), `calculate`
 - `lib/algorithm.ts` — pure calculation; no I/O
 - `components/planner/` — year/country/holiday input components
@@ -33,6 +33,15 @@ Next.js 14 (App Router, TypeScript, Tailwind). All work on `feature/nextjs-rebui
 ## Testing
 - Assert specific date values and `needToApply` per day — not just aggregates (`length > 0`, `some(...)`)
 - Test `getHolidayWeekends` directly for weekend edge cases (Sat/Sun holidays need separate tests from weekday holidays)
+
+## Branding
+- "Long Leave Planner" describes what the app does (plan long leaves), it is NOT the product/brand name
+- Do NOT use "longleaveplanner.com" — there is no such domain, it does not exist
+- For any footer, watermark, or marketing text: use `window.location.origin` (the actual running URL) — never hardcode a domain
+- The app has no official product name — refer to it descriptively if needed
+
+## Workflow
+- Do NOT commit changes during a session unless the user explicitly asks — they will commit when ready
 
 ## Gotchas
 - `formatDateString` is exported from `lib/algorithm.ts` — import it rather than redefining
