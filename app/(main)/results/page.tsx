@@ -7,9 +7,12 @@ import { MonthNav } from '@/components/results/MonthNav'
 import { OpportunityCard } from '@/components/results/OpportunityCard'
 import { SummaryCard } from '@/components/results/SummaryCard'
 import { SessionSwitcher } from '@/components/results/SessionSwitcher'
+import { SaveShareModal } from '@/components/results/SaveShareModal'
+import { ExportPdfModal } from '@/components/results/ExportPdfModal'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { getSessions, deleteSession } from '@/lib/sessions'
+import { getSessions, deleteSession, saveSession } from '@/lib/sessions'
+import { decodeSession } from '@/lib/exportUtils'
 import type { Session } from '@/lib/types'
 
 export default function ResultsPage() {
@@ -19,20 +22,36 @@ export default function ResultsPage() {
   // Default to current month — NOT first cluster month
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
   const [activeClusterId, setActiveClusterId] = useState<string | null>(null)
+  const [showSaveShare, setShowSaveShare] = useState(false)
+  const [showExportPdf, setShowExportPdf] = useState(false)
 
   useEffect(() => {
-    const allSessions = getSessions()
-    if (allSessions.length === 0) {
-      router.replace('/')
-      return
+    const load = async () => {
+      // Check for shared plan in URL hash before loading from localStorage
+      const hash = window.location.hash
+      if (hash.startsWith('#plan=')) {
+        const encoded = hash.slice(6)
+        const shared = await decodeSession(encoded)
+        if (shared) {
+          saveSession(shared)
+          history.replaceState(null, '', window.location.pathname)
+        }
+      }
+
+      const allSessions = getSessions()
+      if (allSessions.length === 0) {
+        router.replace('/')
+        return
+      }
+
+      setSessions(allSessions)
+
+      // Load the last active session ID, or use the most recent session
+      const activeId = localStorage.getItem('llp_active_session')
+      const active = (activeId ? allSessions.find(s => s.id === activeId) : null) ?? allSessions[0]
+      setActiveSession(active)
     }
-
-    setSessions(allSessions)
-
-    // Load the last active session ID, or use the most recent session
-    const activeId = localStorage.getItem('llp_active_session')
-    const active = (activeId ? allSessions.find(s => s.id === activeId) : null) ?? allSessions[0]
-    setActiveSession(active)
+    load()
   }, [router])
 
   const handleSwitchSession = (session: Session) => {
@@ -101,6 +120,14 @@ export default function ResultsPage() {
               <Button variant="secondary" onClick={() => router.push('/')} className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-lg">add</span>
                 New Plan
+              </Button>
+              <Button variant="secondary" onClick={() => setShowSaveShare(true)} className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg">save</span>
+                Save / Share
+              </Button>
+              <Button variant="primary" onClick={() => setShowExportPdf(true)} className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+                Export PDF
               </Button>
             </div>
           </div>
@@ -179,6 +206,13 @@ export default function ResultsPage() {
           </aside>
         </div>
       </div>
+
+      {showSaveShare && (
+        <SaveShareModal session={activeSession} onClose={() => setShowSaveShare(false)} />
+      )}
+      {showExportPdf && (
+        <ExportPdfModal session={activeSession} onClose={() => setShowExportPdf(false)} />
+      )}
     </div>
   )
 }
